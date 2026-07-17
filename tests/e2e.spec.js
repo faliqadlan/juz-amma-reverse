@@ -42,7 +42,7 @@ test.describe('Juz Amma Reverse E2E', () => {
   });
 
   test('Verse Display', async ({ page }) => {
-    // Click on the first Surah (An-Nas)
+    // Click on the first Surah (Al-Fatihah)
     await page.locator('.surah-item').first().click();
 
     // Wait for verses to load
@@ -58,6 +58,19 @@ test.describe('Juz Amma Reverse E2E', () => {
     // Check if translations are present
     await expect(verses.first().locator('.translation-en')).toBeVisible();
     await expect(verses.first().locator('.translation-id')).toBeVisible();
+  });
+
+  test('Verse Display for Long Surah (An-Naba)', async ({ page }) => {
+    // Click on the last Surah (An-Naba) which is the longest in Juz Amma (40 verses)
+    const lastSurah = page.locator('.surah-item').last();
+    await lastSurah.click();
+
+    // Wait for verses to load
+    await page.waitForSelector('.verse-item');
+
+    // Verify all 40 verses are rendered (not capped at 10)
+    const verses = page.locator('.verse-item');
+    await expect(verses).toHaveCount(40);
   });
 
   test('Audio Playback', async ({ page }) => {

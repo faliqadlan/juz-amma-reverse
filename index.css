@@ -361,8 +361,8 @@ audio::-webkit-media-controls-time-remaining-display {
     }
     .sidebar {
         width: 100%;
-        flex: 0 0 40%;
-        height: auto;
+        height: 40dvh;
+        flex-shrink: 0;
         border-right: none;
         border-bottom: 1px solid var(--glass-border);
     }
@@ -389,8 +389,8 @@ audio::-webkit-media-controls-time-remaining-display {
         font-size: 1.1rem;
     }
     .main-content {
-        flex: 0 0 60%;
-        height: auto;
+        flex: 1;
+        min-height: 0;
     }
     .main-header {
         padding: 1rem;

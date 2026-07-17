@@ -178,7 +178,7 @@ async function selectSurah(surahId, listIndex) {
 async function fetchVerses(surahId) {
     try {
         // Fetch with Indo and English translations
-        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=id&words=false&translations=${state.translations.id},${state.translations.en}&fields=text_uthmani`);
+        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=id&words=false&translations=${state.translations.id},${state.translations.en}&fields=text_uthmani&per_page=150`);
         const data = await res.json();
         
         renderVerses(data.verses);
