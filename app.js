@@ -1,0 +1,225 @@
+const state = {
+    reciters: [],
+    surahs: [],
+    selectedReciter: null,
+    currentSurah: null,
+    translations: { en: 131, id: 33 }
+};
+
+const DOM = {
+    reciterSelect: document.getElementById('reciter-select'),
+    surahList: document.getElementById('surah-list'),
+    versesContainer: document.getElementById('verses-container'),
+    audioPlayerContainer: document.getElementById('audio-player-container'),
+    audioPlayer: document.getElementById('audio-player'),
+    nowPlayingTitle: document.getElementById('now-playing-title'),
+    currentSurahTitle: document.getElementById('current-surah-title'),
+    currentSurahSubtitle: document.getElementById('current-surah-subtitle')
+};
+
+async function init() {
+    await fetchReciters();
+    await fetchSurahs();
+    setupEventListeners();
+}
+
+async function fetchReciters() {
+    try {
+        const res = await fetch('https://api.quran.com/api/v4/resources/recitations?language=en');
+        const data = await res.json();
+        state.reciters = data.recitations;
+        
+        DOM.reciterSelect.innerHTML = '';
+        state.reciters.forEach(reciter => {
+            const option = document.createElement('option');
+            option.value = reciter.id;
+            // E.g. "AbdulBaset AbdulSamad (Murattal)"
+            option.textContent = `${reciter.translated_name.name} ${reciter.style ? `(${reciter.style})` : ''}`;
+            DOM.reciterSelect.appendChild(option);
+        });
+
+        // Set Mishary as default if available, otherwise first
+        const mishary = state.reciters.find(r => r.id === 7); // Mishary Rashid Alafasy is usually ID 7
+        if (mishary) {
+            DOM.reciterSelect.value = 7;
+            state.selectedReciter = 7;
+        } else if (state.reciters.length > 0) {
+            DOM.reciterSelect.value = state.reciters[0].id;
+            state.selectedReciter = state.reciters[0].id;
+        }
+    } catch (err) {
+        console.error('Failed to fetch reciters', err);
+    }
+}
+
+async function fetchSurahs() {
+    try {
+        const res = await fetch('https://api.quran.com/api/v4/chapters?language=en');
+        const data = await res.json();
+        
+        // Filter Juz Amma (Surah 78 to 114) and reverse it
+        const juzAmma = data.chapters.filter(c => c.id >= 78 && c.id <= 114);
+        const reversedJuzAmma = juzAmma.reverse();
+        
+        // Add Al-Fatihah at the very beginning
+        const alFatihah = data.chapters.find(c => c.id === 1);
+        state.surahs = [alFatihah, ...reversedJuzAmma];
+
+        renderSurahList();
+    } catch (err) {
+        console.error('Failed to fetch surahs', err);
+    }
+}
+
+function renderSurahList() {
+    DOM.surahList.innerHTML = '';
+    state.surahs.forEach((surah, index) => {
+        const div = document.createElement('div');
+        div.className = 'surah-item';
+        div.dataset.id = surah.id;
+        div.dataset.index = index; // for autoplay next
+        
+        div.innerHTML = `
+            <span class="surah-number">${surah.id}</span>
+            <span class="surah-name-en">${surah.name_simple}</span>
+            <span class="surah-name-ar">${surah.name_arabic}</span>
+        `;
+        
+        div.addEventListener('click', () => selectSurah(surah.id, index));
+        DOM.surahList.appendChild(div);
+    });
+}
+
+async function selectSurah(surahId, listIndex) {
+    state.currentSurah = { id: surahId, index: listIndex };
+    const surahData = state.surahs.find(s => s.id === surahId);
+    
+    // Update active class in sidebar
+    document.querySelectorAll('.surah-item').forEach(el => el.classList.remove('active'));
+    const activeItem = document.querySelector(`.surah-item[data-id="${surahId}"]`);
+    if (activeItem) activeItem.classList.add('active');
+
+    // Update Main Header
+    DOM.currentSurahTitle.textContent = `${surahData.name_simple} (${surahData.name_arabic})`;
+    DOM.currentSurahSubtitle.textContent = surahData.translated_name.name;
+
+    // Load Data
+    DOM.versesContainer.innerHTML = '<div class="loading">Loading verses...</div>';
+    await fetchVerses(surahId);
+    await loadAudio(surahId);
+}
+
+async function fetchVerses(surahId) {
+    try {
+        // Fetch with Indo and English translations
+        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=id&words=false&translations=${state.translations.id},${state.translations.en}&fields=text_uthmani`);
+        const data = await res.json();
+        
+        renderVerses(data.verses);
+    } catch (err) {
+        console.error('Failed to fetch verses', err);
+        DOM.versesContainer.innerHTML = '<div class="welcome-message">Failed to load verses.</div>';
+    }
+}
+
+function renderVerses(verses) {
+    DOM.versesContainer.innerHTML = '';
+    
+    // Add Bismillah at the top, except for Al-Fatihah (which has it as verse 1)
+    if (state.currentSurah && state.currentSurah.id !== 1) {
+        const bismillahHTML = `
+            <div class="bismillah-container">
+                <div class="bismillah-text">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>
+            </div>
+        `;
+        DOM.versesContainer.insertAdjacentHTML('beforeend', bismillahHTML);
+    }
+
+    verses.forEach(verse => {
+        const verseNum = verse.verse_number;
+        const textUthmani = verse.text_uthmani;
+        
+        // Match translations safely
+        const indo = verse.translations.find(t => t.resource_id === state.translations.id)?.text || '';
+        const eng = verse.translations.find(t => t.resource_id === state.translations.en)?.text || '';
+
+        const verseHTML = `
+            <div class="verse-item">
+                <div class="verse-header">
+                    <span class="verse-number">${verseNum}</span>
+                </div>
+                <div class="verse-text-ar">${textUthmani}</div>
+                <div class="verse-translations">
+                    <div class="translation-en">
+                        <span class="translation-label">English</span>
+                        ${eng}
+                    </div>
+                    <div class="translation-id">
+                        <span class="translation-label">Indonesia</span>
+                        ${indo}
+                    </div>
+                </div>
+            </div>
+        `;
+        DOM.versesContainer.insertAdjacentHTML('beforeend', verseHTML);
+    });
+}
+
+async function loadAudio(surahId) {
+    if (!state.selectedReciter) return;
+    
+    try {
+        const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${state.selectedReciter}/${surahId}`);
+        const data = await res.json();
+        
+        if (data.audio_file) {
+            DOM.audioPlayerContainer.style.display = 'flex';
+            DOM.audioPlayer.src = data.audio_file.audio_url;
+            
+            const surahData = state.surahs.find(s => s.id === surahId);
+            const reciterSelect = DOM.reciterSelect;
+            const reciterName = reciterSelect.options[reciterSelect.selectedIndex].text;
+            
+            DOM.nowPlayingTitle.textContent = `Surah ${surahData.name_simple} - ${reciterName}`;
+            
+            // Auto play
+            DOM.audioPlayer.play().catch(e => console.log('Auto-play prevented by browser', e));
+        }
+    } catch (err) {
+        console.error('Failed to load audio', err);
+    }
+}
+
+function setupEventListeners() {
+    // Reciter change
+    DOM.reciterSelect.addEventListener('change', (e) => {
+        state.selectedReciter = e.target.value;
+        if (state.currentSurah) {
+            // Reload audio for current surah
+            loadAudio(state.currentSurah.id);
+        }
+    });
+
+    // Auto-play next reverse Surah
+    DOM.audioPlayer.addEventListener('ended', () => {
+        if (!state.currentSurah) return;
+        
+        const nextIndex = state.currentSurah.index + 1;
+        // Since list is reversed (114 at index 0, 113 at index 1, etc.)
+        if (nextIndex < state.surahs.length) {
+            const nextSurah = state.surahs[nextIndex];
+            selectSurah(nextSurah.id, nextIndex);
+        } else {
+            // End of Juz Amma reached, switch to next reciter and start over
+            const currentReciterIndex = DOM.reciterSelect.selectedIndex;
+            if (currentReciterIndex + 1 < DOM.reciterSelect.options.length) {
+                DOM.reciterSelect.selectedIndex = currentReciterIndex + 1;
+                state.selectedReciter = DOM.reciterSelect.value;
+                selectSurah(state.surahs[0].id, 0); // Start from An-Nas
+            }
+        }
+    });
+}
+
+// Start
+init();

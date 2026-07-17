@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juz Amma Reverse</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: List of Surahs -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Juz Amma Reverse</h1>
+                <p>An-Nas to An-Naba</p>
+            </div>
+            <div class="reciter-selection">
+                <label for="reciter-select">Reciter:</label>
+                <select id="reciter-select">
+                    <option value="" disabled selected>Loading reciters...</option>
+                </select>
+            </div>
+            <div class="surah-list" id="surah-list">
+                <!-- Surahs will be dynamically inserted here -->
+            </div>
+        </aside>
+
+        <!-- Main Content: Verses & Audio -->
+        <main class="main-content">
+            <header class="main-header">
+                <h2 id="current-surah-title">Select a Surah</h2>
+                <p id="current-surah-subtitle">to begin reading and listening</p>
+            </header>
+
+            <div class="verses-container" id="verses-container">
+                <div class="welcome-message">
+                    Welcome to Juz Amma Reverse! <br> Please select a Surah from the sidebar.
+                </div>
+            </div>
+
+            <div class="audio-player-container glassmorphism" id="audio-player-container" style="display: none;">
+                <div class="player-info">
+                    <span id="now-playing-title">Playing: None</span>
+                </div>
+                <audio id="audio-player" controls>
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

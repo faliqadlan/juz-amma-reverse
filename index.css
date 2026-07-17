@@ -1,0 +1,351 @@
+/* Modern CSS Reset & Variables */
+:root {
+    --bg-color: #0f172a;
+    --sidebar-bg: rgba(30, 41, 59, 0.7);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    
+    --font-sans: 'Inter', sans-serif;
+    --font-arabic: 'Amiri', serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Glassmorphism Utilities */
+.glassmorphism {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 350px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(20px);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.sidebar-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.reciter-selection {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.reciter-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.reciter-selection select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.reciter-selection select:focus {
+    border-color: var(--accent-color);
+}
+
+.surah-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* Custom Scrollbar for surah-list */
+.surah-list::-webkit-scrollbar {
+    width: 6px;
+}
+.surah-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+.surah-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.surah-item:hover {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    transform: translateX(4px);
+}
+
+.surah-item.active {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: var(--accent-color);
+    border-left: 4px solid var(--accent-color);
+}
+
+.surah-number {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 30px;
+}
+
+.surah-name-en {
+    flex: 1;
+    font-weight: 600;
+}
+
+.surah-name-ar {
+    font-family: var(--font-arabic);
+    font-size: 1.2rem;
+    color: var(--accent-color);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header {
+    padding: 2rem 3rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.main-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.main-header p {
+    color: var(--text-secondary);
+}
+
+.verses-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 3rem 100px 3rem; /* padding bottom for audio player */
+    scroll-behavior: smooth;
+}
+
+.verses-container::-webkit-scrollbar {
+    width: 8px;
+}
+.verses-container::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+.welcome-message {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 5rem;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.verse-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.verse-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.verse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1rem;
+}
+
+.verse-number {
+    background: var(--accent-color);
+    color: #0f172a;
+    padding: 0.2rem 0.8rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.verse-text-ar {
+    font-family: var(--font-arabic);
+    font-size: 2.2rem;
+    line-height: 2;
+    text-align: right;
+    direction: rtl;
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.verse-translations {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.translation-en, .translation-id {
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.translation-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-color);
+    margin-bottom: 0.2rem;
+    display: block;
+}
+
+/* Audio Player */
+.audio-player-container {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.player-info {
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+audio {
+    width: 100%;
+    outline: none;
+    border-radius: 30px;
+}
+
+/* Customizing the audio element in webkit */
+audio::-webkit-media-controls-panel {
+    background: rgba(255, 255, 255, 0.1);
+}
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: var(--text-primary);
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .audio-player-container {
+        bottom: 1rem;
+        width: 95%;
+        padding: 1rem;
+    }
+}
+
+/* Bismillah */
+.bismillah-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+.bismillah-text {
+    font-family: var(--font-arabic);
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    line-height: 1.5;
+}
