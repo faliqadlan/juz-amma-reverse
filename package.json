@@ -1,0 +1,24 @@
+{
+  "name": "juz-amma-reverse",
+  "version": "1.0.0",
+  "description": "A web application that provides a reading and listening experience for Juz Amma (Surahs 78 to 114) of the Quran in reverse order (starting from An-Nas and going backwards to An-Naba), with Al-Fatihah included at the very beginning.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faliqadlan/juz-amma-reverse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faliqadlan/juz-amma-reverse/issues"
+  },
+  "homepage": "https://github.com/faliqadlan/juz-amma-reverse#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "http-server": "^14.1.1"
+  }
+}
