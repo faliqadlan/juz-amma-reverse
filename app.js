@@ -123,7 +123,10 @@ async function selectSurah(surahId, listIndex) {
     // Update active class in sidebar
     document.querySelectorAll('.surah-item').forEach(el => el.classList.remove('active'));
     const activeItem = document.querySelector(`.surah-item[data-id="${surahId}"]`);
-    if (activeItem) activeItem.classList.add('active');
+    if (activeItem) {
+        activeItem.classList.add('active');
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     // Update Main Header
     DOM.currentSurahTitle.textContent = `${surahData.name_simple} (${surahData.name_arabic})`;
