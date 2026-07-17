@@ -12,7 +12,7 @@ const state = {
 };
 
 const FILTER_GROUPS = {
-    background: [4, 9, 2, 6], // Shatri, Minshawi (Murattal), AbdulBaset (Murattal), Husary
+    background: [4, 9, 2, 6, 7, 3], // Shatri, Minshawi (Murattal), AbdulBaset (Murattal), Husary, Mishary, Sudais
     murajaah: [12, 7, 8] // Husary (Muallim), Mishary, Minshawi (Mujawwad)
 };
 
