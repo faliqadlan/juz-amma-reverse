@@ -5,7 +5,9 @@ const state = {
     currentSurah: null,
     translations: { en: 131, id: 33 },
     currentTimestamps: [],
-    currentActiveVerseNum: null
+    currentActiveVerseNum: null,
+    playingBismillah: false,
+    currentChapterAudioUrl: null
 };
 
 const DOM = {
@@ -178,13 +180,38 @@ async function loadAudio(surahId) {
             state.currentTimestamps = data.audio_file.timestamps || [];
             state.currentActiveVerseNum = null;
             DOM.audioPlayerContainer.style.display = 'flex';
-            DOM.audioPlayer.src = data.audio_file.audio_url;
             
             const surahData = state.surahs.find(s => s.id === surahId);
             const reciterSelect = DOM.reciterSelect;
             const reciterName = reciterSelect.options[reciterSelect.selectedIndex].text;
             
             DOM.nowPlayingTitle.textContent = `Surah ${surahData.name_simple} - ${reciterName}`;
+            
+            state.currentChapterAudioUrl = data.audio_file.audio_url;
+            
+            // Check if we need to prepend Bismillah
+            if (surahId !== 1 && surahId !== 9) {
+                try {
+                    const bismillahRes = await fetch(`https://api.quran.com/api/v4/recitations/${state.selectedReciter}/by_chapter/1`);
+                    const bismillahData = await bismillahRes.json();
+                    if (bismillahData.audio_files && bismillahData.audio_files.length > 0) {
+                        const bismillahAudioUrl = bismillahData.audio_files[0].url;
+                        const bismillahUrlFull = bismillahAudioUrl.startsWith('http') || bismillahAudioUrl.startsWith('//') 
+                            ? bismillahAudioUrl 
+                            : `https://verses.quran.com/${bismillahAudioUrl}`;
+                        
+                        state.playingBismillah = true;
+                        DOM.audioPlayer.src = bismillahUrlFull;
+                        DOM.audioPlayer.play().catch(e => console.log('Auto-play prevented by browser', e));
+                        return; // Exit early, chapter audio will play on 'ended'
+                    }
+                } catch (err) {
+                    console.error('Failed to load bismillah audio', err);
+                }
+            }
+            
+            state.playingBismillah = false;
+            DOM.audioPlayer.src = state.currentChapterAudioUrl;
             
             // Auto play
             DOM.audioPlayer.play().catch(e => console.log('Auto-play prevented by browser', e));
@@ -206,6 +233,8 @@ function setupEventListeners() {
 
     // Auto-scroll follow audio
     DOM.audioPlayer.addEventListener('timeupdate', () => {
+        if (state.playingBismillah) return;
+        
         if (!state.currentTimestamps || state.currentTimestamps.length === 0) return;
         
         const currentTimeMs = DOM.audioPlayer.currentTime * 1000;
@@ -235,6 +264,13 @@ function setupEventListeners() {
 
     // Auto-play next reverse Surah
     DOM.audioPlayer.addEventListener('ended', () => {
+        if (state.playingBismillah && state.currentChapterAudioUrl) {
+            state.playingBismillah = false;
+            DOM.audioPlayer.src = state.currentChapterAudioUrl;
+            DOM.audioPlayer.play().catch(e => console.log('Auto-play prevented by browser', e));
+            return;
+        }
+
         if (!state.currentSurah) return;
         
         const nextIndex = state.currentSurah.index + 1;
