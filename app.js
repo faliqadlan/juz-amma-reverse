@@ -4,7 +4,7 @@ const state = {
     surahs: [],
     selectedReciter: null,
     currentSurah: null,
-    translations: { en: 131, id: 33 },
+    translations: { en: 20, id: 33 },
     currentTimestamps: [],
     currentActiveVerseNum: null,
     playingBismillah: false,
