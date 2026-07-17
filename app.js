@@ -3,7 +3,9 @@ const state = {
     surahs: [],
     selectedReciter: null,
     currentSurah: null,
-    translations: { en: 131, id: 33 }
+    translations: { en: 131, id: 33 },
+    currentTimestamps: [],
+    currentActiveVerseNum: null
 };
 
 const DOM = {
@@ -144,7 +146,7 @@ function renderVerses(verses) {
         const eng = verse.translations.find(t => t.resource_id === state.translations.en)?.text || '';
 
         const verseHTML = `
-            <div class="verse-item">
+            <div class="verse-item" id="verse-${verseNum}">
                 <div class="verse-header">
                     <span class="verse-number">${verseNum}</span>
                 </div>
@@ -173,6 +175,8 @@ async function loadAudio(surahId) {
         const data = await res.json();
         
         if (data.audio_file) {
+            state.currentTimestamps = data.audio_file.timestamps || [];
+            state.currentActiveVerseNum = null;
             DOM.audioPlayerContainer.style.display = 'flex';
             DOM.audioPlayer.src = data.audio_file.audio_url;
             
@@ -197,6 +201,35 @@ function setupEventListeners() {
         if (state.currentSurah) {
             // Reload audio for current surah
             loadAudio(state.currentSurah.id);
+        }
+    });
+
+    // Auto-scroll follow audio
+    DOM.audioPlayer.addEventListener('timeupdate', () => {
+        if (!state.currentTimestamps || state.currentTimestamps.length === 0) return;
+        
+        const currentTimeMs = DOM.audioPlayer.currentTime * 1000;
+        const currentVerse = state.currentTimestamps.find(
+            t => currentTimeMs >= t.timestamp_from && currentTimeMs <= t.timestamp_to
+        );
+        
+        if (currentVerse) {
+            const verseNum = currentVerse.verse_key.split(':')[1];
+            
+            if (state.currentActiveVerseNum !== verseNum) {
+                // Remove active class from all verses
+                document.querySelectorAll('.verse-item').forEach(el => el.classList.remove('active-verse'));
+                
+                // Add active class to current verse
+                const activeVerseEl = document.getElementById(`verse-${verseNum}`);
+                if (activeVerseEl) {
+                    activeVerseEl.classList.add('active-verse');
+                    
+                    // Smooth scroll to the verse
+                    activeVerseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    state.currentActiveVerseNum = verseNum;
+                }
+            }
         }
     });
 

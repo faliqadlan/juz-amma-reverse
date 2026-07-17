@@ -219,6 +219,13 @@ body {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
+.verse-item.active-verse {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    transform: translateY(-2px);
+}
+
 .verse-header {
     display: flex;
     justify-content: space-between;
