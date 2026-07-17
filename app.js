@@ -4,6 +4,7 @@ const state = {
     surahs: [],
     selectedReciter: null,
     currentSurah: null,
+    currentFilterType: 'all',
     translations: { en: 20, id: 33 },
     currentTimestamps: [],
     currentActiveVerseNum: null,
@@ -28,9 +29,36 @@ const DOM = {
     filterBtns: document.querySelectorAll('.filter-btn')
 };
 
+function saveState() {
+    localStorage.setItem('juzAmmaState', JSON.stringify({
+        filterType: state.currentFilterType,
+        reciterId: state.selectedReciter,
+        surahId: state.currentSurah ? state.currentSurah.id : null,
+        surahIndex: state.currentSurah ? state.currentSurah.index : null
+    }));
+}
+
 async function init() {
+    const savedState = JSON.parse(localStorage.getItem('juzAmmaState')) || {};
+    if (savedState.filterType) state.currentFilterType = savedState.filterType;
+    if (savedState.reciterId) state.selectedReciter = Number(savedState.reciterId);
+
+    // Set active filter button visually
+    DOM.filterBtns.forEach(btn => {
+        if (btn.dataset.filter === state.currentFilterType) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
     await fetchReciters();
     await fetchSurahs();
+    
+    if (savedState.surahId) {
+        selectSurah(savedState.surahId, savedState.surahIndex);
+    }
+    
     setupEventListeners();
 }
 
@@ -40,7 +68,7 @@ async function fetchReciters() {
         const data = await res.json();
         state.allReciters = data.recitations;
         
-        renderReciters('all');
+        renderReciters(state.currentFilterType);
     } catch (err) {
         console.error('Failed to fetch reciters', err);
     }
@@ -64,9 +92,15 @@ function renderReciters(filterType) {
     });
 
     let defaultReciterId;
-    if (filterType === 'background') defaultReciterId = 4; // Shatri
-    else if (filterType === 'murajaah') defaultReciterId = 12; // Husary (Muallim)
-    else defaultReciterId = 4; // Overall default is Shatri
+    if (state.selectedReciter && state.reciters.some(r => r.id === state.selectedReciter)) {
+        defaultReciterId = state.selectedReciter;
+    } else if (filterType === 'background') {
+        defaultReciterId = 4; // Shatri
+    } else if (filterType === 'murajaah') {
+        defaultReciterId = 12; // Husary (Muallim)
+    } else {
+        defaultReciterId = 4; // Overall default is Shatri
+    }
 
     const defaultReciter = state.reciters.find(r => r.id === defaultReciterId);
     if (defaultReciter) {
@@ -76,6 +110,8 @@ function renderReciters(filterType) {
         DOM.reciterSelect.value = state.reciters[0].id;
         state.selectedReciter = state.reciters[0].id;
     }
+    
+    saveState();
 }
 
 async function fetchSurahs() {
@@ -118,6 +154,7 @@ function renderSurahList() {
 
 async function selectSurah(surahId, listIndex) {
     state.currentSurah = { id: surahId, index: listIndex };
+    saveState();
     const surahData = state.surahs.find(s => s.id === surahId);
     
     // Update active class in sidebar
@@ -254,6 +291,8 @@ function setupEventListeners() {
             e.target.classList.add('active');
             
             const filter = e.target.dataset.filter;
+            state.currentFilterType = filter;
+            state.selectedReciter = null; // Reset saved reciter so default applies
             renderReciters(filter);
             
             // Reload audio if surah is selected
@@ -265,7 +304,8 @@ function setupEventListeners() {
 
     // Reciter change
     DOM.reciterSelect.addEventListener('change', (e) => {
-        state.selectedReciter = e.target.value;
+        state.selectedReciter = Number(e.target.value);
+        saveState();
         if (state.currentSurah) {
             // Reload audio for current surah
             loadAudio(state.currentSurah.id);
