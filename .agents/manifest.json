@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "template_version": "2.2.0",
+  "schema_version": 1,
+  "template_version": "1.0.0",
   "core": {
     "files": [
       ".gitignore",
@@ -28,6 +28,15 @@
       "researcher",
       "reviewer",
       "test-runner"
+    ],
+    "rules": [
+      "universal-agent"
+    ],
+    "workflows": [
+      "create-agent-task",
+      "onboard-repository",
+      "resume-handoff",
+      "save-handoff"
     ],
     "task_validators": [
       "skills/agent-task/scripts/validate_task.py"

@@ -1,7 +1,7 @@
 <!-- code-agent-template:managed -->
-# Universal Coding-Agent Guide
+# Antigravity Coding-Agent Guide
 
-The user loads this file through the Standard conversation bootstrap. Once loaded, treat it as the working agreement and context router for the repository, not merely the `.agents/` directory. Explicit user and higher-priority runtime instructions take precedence.
+Antigravity loads this canonical working agreement through the always-on rule at `.agents/rules/universal-agent.md`. Treat it as the context router for the repository, not merely the `.agents/` directory. Explicit user and higher-priority runtime instructions take precedence.
 
 ## Working agreement
 
@@ -58,3 +58,5 @@ Read a selected `SKILL.md` completely before acting. If no local skill matches a
 Code review and UI verification remain read-only unless the user separately requests fixes. Lead findings with actionable evidence ordered by severity. Never claim visual correctness, test success, portability, or permission enforcement without observing the relevant evidence.
 
 If project context or handoff state is uninitialized, stale, contradictory, or unsupported, verify the repository instead of trusting it. Treat `.agents/context/project.md` as the authority for verified project facts; generate `.agents/context/README.md` only through an explicit `generate-readme` request.
+
+Antigravity model, reasoning, and permission settings remain runtime controls. Never claim this repository selects or verifies them unless the runtime provides direct evidence.
