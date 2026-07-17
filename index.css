@@ -77,6 +77,34 @@ body {
     border-bottom: 1px solid var(--glass-border);
 }
 
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-btn.active {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
 .reciter-selection label {
     display: block;
     margin-bottom: 0.5rem;

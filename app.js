@@ -1,4 +1,5 @@
 const state = {
+    allReciters: [],
     reciters: [],
     surahs: [],
     selectedReciter: null,
@@ -10,6 +11,11 @@ const state = {
     currentChapterAudioUrl: null
 };
 
+const FILTER_GROUPS = {
+    background: [4, 9, 2, 6], // Shatri, Minshawi (Murattal), AbdulBaset (Murattal), Husary
+    murajaah: [12, 7, 8] // Husary (Muallim), Mishary, Minshawi (Mujawwad)
+};
+
 const DOM = {
     reciterSelect: document.getElementById('reciter-select'),
     surahList: document.getElementById('surah-list'),
@@ -18,7 +24,8 @@ const DOM = {
     audioPlayer: document.getElementById('audio-player'),
     nowPlayingTitle: document.getElementById('now-playing-title'),
     currentSurahTitle: document.getElementById('current-surah-title'),
-    currentSurahSubtitle: document.getElementById('current-surah-subtitle')
+    currentSurahSubtitle: document.getElementById('current-surah-subtitle'),
+    filterBtns: document.querySelectorAll('.filter-btn')
 };
 
 async function init() {
@@ -31,28 +38,43 @@ async function fetchReciters() {
     try {
         const res = await fetch('https://api.quran.com/api/v4/resources/recitations?language=en');
         const data = await res.json();
-        state.reciters = data.recitations;
+        state.allReciters = data.recitations;
         
-        DOM.reciterSelect.innerHTML = '';
-        state.reciters.forEach(reciter => {
-            const option = document.createElement('option');
-            option.value = reciter.id;
-            // E.g. "AbdulBaset AbdulSamad (Murattal)"
-            option.textContent = `${reciter.translated_name.name} ${reciter.style ? `(${reciter.style})` : ''}`;
-            DOM.reciterSelect.appendChild(option);
-        });
-
-        // Set Mishary as default if available, otherwise first
-        const mishary = state.reciters.find(r => r.id === 7); // Mishary Rashid Alafasy is usually ID 7
-        if (mishary) {
-            DOM.reciterSelect.value = 7;
-            state.selectedReciter = 7;
-        } else if (state.reciters.length > 0) {
-            DOM.reciterSelect.value = state.reciters[0].id;
-            state.selectedReciter = state.reciters[0].id;
-        }
+        renderReciters('all');
     } catch (err) {
         console.error('Failed to fetch reciters', err);
+    }
+}
+
+function renderReciters(filterType) {
+    if (filterType === 'all') {
+        state.reciters = state.allReciters;
+    } else if (filterType === 'background') {
+        state.reciters = state.allReciters.filter(r => FILTER_GROUPS.background.includes(r.id));
+    } else if (filterType === 'murajaah') {
+        state.reciters = state.allReciters.filter(r => FILTER_GROUPS.murajaah.includes(r.id));
+    }
+
+    DOM.reciterSelect.innerHTML = '';
+    state.reciters.forEach(reciter => {
+        const option = document.createElement('option');
+        option.value = reciter.id;
+        option.textContent = `${reciter.translated_name.name} ${reciter.style ? `(${reciter.style})` : ''}`;
+        DOM.reciterSelect.appendChild(option);
+    });
+
+    let defaultReciterId;
+    if (filterType === 'background') defaultReciterId = 4; // Shatri
+    else if (filterType === 'murajaah') defaultReciterId = 12; // Husary (Muallim)
+    else defaultReciterId = 4; // Overall default is Shatri
+
+    const defaultReciter = state.reciters.find(r => r.id === defaultReciterId);
+    if (defaultReciter) {
+        DOM.reciterSelect.value = defaultReciterId;
+        state.selectedReciter = defaultReciterId;
+    } else if (state.reciters.length > 0) {
+        DOM.reciterSelect.value = state.reciters[0].id;
+        state.selectedReciter = state.reciters[0].id;
     }
 }
 
@@ -222,6 +244,22 @@ async function loadAudio(surahId) {
 }
 
 function setupEventListeners() {
+    // Filter buttons
+    DOM.filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            DOM.filterBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const filter = e.target.dataset.filter;
+            renderReciters(filter);
+            
+            // Reload audio if surah is selected
+            if (state.currentSurah) {
+                loadAudio(state.currentSurah.id);
+            }
+        });
+    });
+
     // Reciter change
     DOM.reciterSelect.addEventListener('change', (e) => {
         state.selectedReciter = e.target.value;
