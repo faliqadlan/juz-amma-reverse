@@ -3,13 +3,14 @@
     --bg-color: #0f172a;
     --sidebar-bg: rgba(30, 41, 59, 0.7);
     --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --text-secondary: #cbd5e1;
     --accent-color: #38bdf8;
     --accent-hover: #0ea5e9;
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(148, 163, 184, 0.2);
+    --glass-bg: rgba(15, 23, 42, 0.4);
     
-    --font-sans: 'Inter', sans-serif;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-display: 'Outfit', sans-serif;
     --font-arabic: 'Amiri', serif;
 }
 
@@ -21,7 +22,8 @@
 
 body {
     font-family: var(--font-sans);
-    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    background-color: var(--bg-color);
+    background-image: linear-gradient(135deg, #020617 0%, #0f172a 100%);
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
@@ -59,18 +61,16 @@ body {
 }
 
 .sidebar-header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    background: linear-gradient(to right, #38bdf8, #818cf8);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
     margin-bottom: 0.5rem;
 }
 
 .sidebar-header p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .reciter-selection {
@@ -91,7 +91,7 @@ body {
     color: var(--text-secondary);
     padding: 0.5rem;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -109,7 +109,7 @@ body {
 .reciter-selection label {
     display: block;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-secondary);
 }
 
@@ -164,13 +164,12 @@ body {
 }
 
 .surah-item.active {
-    background: rgba(56, 189, 248, 0.1);
-    border-color: var(--accent-color);
-    border-left: 4px solid var(--accent-color);
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
 .surah-number {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     min-width: 30px;
 }
@@ -182,7 +181,7 @@ body {
 
 .surah-name-ar {
     font-family: var(--font-arabic);
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: var(--accent-color);
 }
 
@@ -203,12 +202,15 @@ body {
 }
 
 .main-header h2 {
-    font-size: 2rem;
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
 }
 
 .main-header p {
     color: var(--text-secondary);
+    font-size: 1rem;
 }
 
 .verses-container {
@@ -230,7 +232,7 @@ body {
     text-align: center;
     color: var(--text-secondary);
     margin-top: 5rem;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     line-height: 1.6;
 }
 
@@ -269,13 +271,13 @@ body {
     color: #0f172a;
     padding: 0.2rem 0.8rem;
     border-radius: 999px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 700;
+    font-size: 0.75rem;
 }
 
 .verse-text-ar {
     font-family: var(--font-arabic);
-    font-size: 2.2rem;
+    font-size: 3rem;
     line-height: 2;
     text-align: right;
     direction: rtl;
@@ -322,7 +324,7 @@ body {
 
 .player-info {
     margin-bottom: 0.8rem;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -405,10 +407,10 @@ audio::-webkit-media-controls-time-remaining-display {
         padding: 1rem;
     }
     .sidebar-header h1 {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
     .sidebar-header p {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     .reciter-selection {
         padding: 0.75rem 1rem;
@@ -421,7 +423,7 @@ audio::-webkit-media-controls-time-remaining-display {
         margin-bottom: 0.25rem;
     }
     .surah-name-ar {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
     }
     .main-content {
         flex: 1;
@@ -431,10 +433,10 @@ audio::-webkit-media-controls-time-remaining-display {
         padding: 1rem;
     }
     .main-header h2 {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
     }
     .main-header p {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
     .verses-container {
         padding: 1rem 1rem 120px 1rem;
@@ -444,10 +446,10 @@ audio::-webkit-media-controls-time-remaining-display {
         margin-bottom: 1rem;
     }
     .verse-text-ar {
-        font-size: 1.6rem;
+        font-size: 2rem;
     }
     .bismillah-text {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     .bismillah-container {
         padding: 1rem;
@@ -464,7 +466,7 @@ audio::-webkit-media-controls-time-remaining-display {
         border-radius: 12px;
     }
     .player-info {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         margin-bottom: 0.5rem;
     }
     .player-controls-row {
@@ -487,7 +489,7 @@ audio::-webkit-media-controls-time-remaining-display {
 }
 .bismillah-text {
     font-family: var(--font-arabic);
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: var(--accent-color);
     line-height: 1.5;
 }
