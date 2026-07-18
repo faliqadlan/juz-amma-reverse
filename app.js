@@ -9,7 +9,10 @@ const state = {
     currentTimestamps: [],
     currentActiveVerseNum: null,
     playingBismillah: false,
-    currentChapterAudioUrl: null
+    currentChapterAudioUrl: null,
+    loopEnabled: false,
+    shuffleEnabled: false,
+    playedReciters: []
 };
 
 const FILTER_GROUPS = {
@@ -26,7 +29,9 @@ const DOM = {
     nowPlayingTitle: document.getElementById('now-playing-title'),
     currentSurahTitle: document.getElementById('current-surah-title'),
     currentSurahSubtitle: document.getElementById('current-surah-subtitle'),
-    filterBtns: document.querySelectorAll('.filter-btn')
+    filterBtns: document.querySelectorAll('.filter-btn'),
+    shuffleToggle: document.getElementById('shuffle-toggle'),
+    loopToggle: document.getElementById('loop-toggle')
 };
 
 function saveState() {
@@ -34,14 +39,36 @@ function saveState() {
         filterType: state.currentFilterType,
         reciterId: state.selectedReciter,
         surahId: state.currentSurah ? state.currentSurah.id : null,
-        surahIndex: state.currentSurah ? state.currentSurah.index : null
+        surahIndex: state.currentSurah ? state.currentSurah.index : null,
+        loopEnabled: state.loopEnabled,
+        shuffleEnabled: state.shuffleEnabled
     }));
+}
+
+function updateButtonStates() {
+    if (state.loopEnabled) {
+        DOM.loopToggle.classList.add('active');
+        DOM.loopToggle.setAttribute('aria-pressed', 'true');
+    } else {
+        DOM.loopToggle.classList.remove('active');
+        DOM.loopToggle.setAttribute('aria-pressed', 'false');
+    }
+
+    if (state.shuffleEnabled) {
+        DOM.shuffleToggle.classList.add('active');
+        DOM.shuffleToggle.setAttribute('aria-pressed', 'true');
+    } else {
+        DOM.shuffleToggle.classList.remove('active');
+        DOM.shuffleToggle.setAttribute('aria-pressed', 'false');
+    }
 }
 
 async function init() {
     const savedState = JSON.parse(localStorage.getItem('juzAmmaState')) || {};
     if (savedState.filterType) state.currentFilterType = savedState.filterType;
     if (savedState.reciterId) state.selectedReciter = Number(savedState.reciterId);
+    if (savedState.loopEnabled !== undefined) state.loopEnabled = savedState.loopEnabled;
+    if (savedState.shuffleEnabled !== undefined) state.shuffleEnabled = savedState.shuffleEnabled;
 
     // Set active filter button visually
     DOM.filterBtns.forEach(btn => {
@@ -51,6 +78,8 @@ async function init() {
             btn.classList.remove('active');
         }
     });
+
+    updateButtonStates();
 
     await fetchReciters();
     await fetchSurahs();
@@ -283,6 +312,42 @@ async function loadAudio(surahId) {
     }
 }
 
+function getNextReciterId() {
+    const currentReciterId = state.selectedReciter;
+    const reciterIds = state.reciters.map(r => r.id);
+    
+    if (state.shuffleEnabled) {
+        if (!state.playedReciters.includes(currentReciterId)) {
+            state.playedReciters.push(currentReciterId);
+        }
+        
+        const unplayed = reciterIds.filter(id => !state.playedReciters.includes(id));
+        if (unplayed.length > 0) {
+            const randomIndex = Math.floor(Math.random() * unplayed.length);
+            return unplayed[randomIndex];
+        } else {
+            // All reciters played
+            if (state.loopEnabled) {
+                state.playedReciters = [currentReciterId]; // Start new loop, mark current as played so it's not immediately repeated
+                const options = reciterIds.filter(id => id !== currentReciterId);
+                const candidates = options.length > 0 ? options : reciterIds;
+                const randomIndex = Math.floor(Math.random() * candidates.length);
+                return candidates[randomIndex];
+            }
+            return null; // Stop playback
+        }
+    } else {
+        // Sequential playback
+        const currentIndex = reciterIds.indexOf(currentReciterId);
+        if (currentIndex !== -1 && currentIndex + 1 < reciterIds.length) {
+            return reciterIds[currentIndex + 1];
+        } else if (state.loopEnabled) {
+            return reciterIds[0];
+        }
+        return null; // Stop playback
+    }
+}
+
 function setupEventListeners() {
     // Filter buttons
     DOM.filterBtns.forEach(btn => {
@@ -293,6 +358,7 @@ function setupEventListeners() {
             const filter = e.target.dataset.filter;
             state.currentFilterType = filter;
             state.selectedReciter = null; // Reset saved reciter so default applies
+            state.playedReciters = []; // Reset played reciters on filter change
             renderReciters(filter);
             
             // Reload audio if surah is selected
@@ -305,11 +371,27 @@ function setupEventListeners() {
     // Reciter change
     DOM.reciterSelect.addEventListener('change', (e) => {
         state.selectedReciter = Number(e.target.value);
+        state.playedReciters = []; // Reset sequence on manual selection
         saveState();
         if (state.currentSurah) {
             // Reload audio for current surah
             loadAudio(state.currentSurah.id);
         }
+    });
+
+    // Shuffle toggle
+    DOM.shuffleToggle.addEventListener('click', () => {
+        state.shuffleEnabled = !state.shuffleEnabled;
+        state.playedReciters = []; // Reset sequence when toggled
+        updateButtonStates();
+        saveState();
+    });
+
+    // Loop toggle
+    DOM.loopToggle.addEventListener('click', () => {
+        state.loopEnabled = !state.loopEnabled;
+        updateButtonStates();
+        saveState();
     });
 
     // Auto-scroll follow audio
@@ -360,11 +442,12 @@ function setupEventListeners() {
             const nextSurah = state.surahs[nextIndex];
             selectSurah(nextSurah.id, nextIndex);
         } else {
-            // End of Juz Amma reached, switch to next reciter and start over
-            const currentReciterIndex = DOM.reciterSelect.selectedIndex;
-            if (currentReciterIndex + 1 < DOM.reciterSelect.options.length) {
-                DOM.reciterSelect.selectedIndex = currentReciterIndex + 1;
-                state.selectedReciter = DOM.reciterSelect.value;
+            // End of Juz Amma reached, switch to next/random reciter and start over
+            const nextReciterId = getNextReciterId();
+            if (nextReciterId !== null) {
+                state.selectedReciter = nextReciterId;
+                DOM.reciterSelect.value = nextReciterId;
+                saveState();
                 selectSurah(state.surahs[0].id, 0); // Start from An-Nas
             }
         }

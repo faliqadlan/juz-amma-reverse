@@ -119,4 +119,36 @@ test.describe('Juz Amma Reverse E2E', () => {
     await expect(lastSurah).toHaveClass(/active/);
     await expect(lastSurah).toBeInViewport();
   });
+
+  test('Shuffle and Loop Controls', async ({ page }) => {
+    // Click on the first Surah (Al-Fatihah) to make the audio player visible
+    await page.locator('.surah-item').first().click();
+    await page.waitForSelector('.verse-item');
+
+    // Verify shuffle toggle button is visible
+    const shuffleToggle = page.locator('#shuffle-toggle');
+    await expect(shuffleToggle).toBeVisible();
+    await expect(shuffleToggle).toHaveAttribute('aria-pressed', 'false');
+
+    // Click shuffle and check it's active
+    await shuffleToggle.click();
+    await expect(shuffleToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(shuffleToggle).toHaveClass(/active/);
+
+    // Verify loop toggle button is visible
+    const loopToggle = page.locator('#loop-toggle');
+    await expect(loopToggle).toBeVisible();
+    await expect(loopToggle).toHaveAttribute('aria-pressed', 'false');
+
+    // Click loop and check it's active
+    await loopToggle.click();
+    await expect(loopToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(loopToggle).toHaveClass(/active/);
+
+    // Reload page to verify persistence
+    await page.reload();
+    await page.waitForSelector('.surah-item');
+    await expect(page.locator('#shuffle-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#loop-toggle')).toHaveAttribute('aria-pressed', 'true');
+  });
 });
