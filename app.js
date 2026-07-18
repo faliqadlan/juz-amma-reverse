@@ -264,11 +264,12 @@ async function loadAudio(surahId) {
     if (!state.selectedReciter) return;
     
     try {
-        const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${state.selectedReciter}/${surahId}`);
+        const res = await fetch(`https://api.qurancdn.com/api/qdc/audio/reciters/${state.selectedReciter}/audio_files?chapter=${surahId}&segments=true`);
         const data = await res.json();
         
-        if (data.audio_file) {
-            state.currentTimestamps = data.audio_file.timestamps || [];
+        if (data.audio_files && data.audio_files.length > 0) {
+            const audioData = data.audio_files[0];
+            state.currentTimestamps = audioData.verse_timings || [];
             state.currentActiveVerseNum = null;
             DOM.audioPlayerContainer.style.display = 'flex';
             
@@ -278,7 +279,7 @@ async function loadAudio(surahId) {
             
             DOM.nowPlayingTitle.textContent = `Surah ${surahData.name_simple} - ${reciterName}`;
             
-            state.currentChapterAudioUrl = data.audio_file.audio_url;
+            state.currentChapterAudioUrl = audioData.audio_url;
             
             // Check if we need to prepend Bismillah
             if (surahId !== 1 && surahId !== 9) {
